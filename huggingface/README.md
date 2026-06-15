@@ -3,17 +3,15 @@ title: AI Study Assistant
 emoji: 🧠
 colorFrom: indigo
 colorTo: pink
-sdk: streamlit
-sdk_version: 1.30.0
-app_file: app.py
+sdk: docker
 pinned: false
 ---
 
-# Agentic AI Study Assistant
+# Agentic AI Study Assistant (Flask Version)
 
-An interactive learning companion for students built using **Python, Streamlit, LangChain, and Groq API**.
+An interactive learning companion for students built using **Python, Flask, HTML/CSS/JS, LangChain, and Groq API**.
 
-This app is hosted on Hugging Face Spaces. It uses high-speed open-weights models (like Llama 3.3) to power its agentic features.
+This app is designed to be hosted on Hugging Face Spaces using the **Docker SDK**.
 
 ## 🚀 Features
 
@@ -24,7 +22,7 @@ This app is hosted on Hugging Face Spaces. It uses high-speed open-weights model
 
 2. **📝 Generate Notes**:
    - Generates beautifully structured markdown study sheets tailored to target grade levels.
-   - Renders interactive knowledge mindmaps live using **Mermaid.js**.
+   - Renders interactive knowledge mindmaps live using **Mermaid.js** directly in the DOM.
    - Includes a direct markdown export/download button.
 
 3. **🧠 Create Quiz**:
@@ -35,16 +33,14 @@ This app is hosted on Hugging Face Spaces. It uses high-speed open-weights model
 
 To run this app on your own Hugging Face Space:
 
-1. **Set up Secrets**:
+1. **Create a Space**:
+   Go to your Space's **New Space** creator -> choose **Docker** as the SDK (instead of Streamlit or Gradio) -> select the **Blank** template -> click **Create Space**.
+
+2. **Set up Secrets**:
    Go to your Space's **Settings** tab -> **Variables and secrets** section -> **New secret**, and add:
    * **Key**: `GROQ_API_KEY`
    * **Value**: *[Your Groq API Key]* (Get one for free at [console.groq.com](https://console.groq.com))
 
-2. **Required Files**:
-   Ensure the following files are in the repository root (which are pre-packaged in this folder):
-   * `app.py`
-   * `agent.py`
-   * `notes_generator.py`
-   * `quiz_creator.py`
-   * `requirements.txt`
-   * `README.md` (containing this configuration header)
+3. **Deploy Files**:
+   Push the files inside this directory (including `app.py`, `templates/`, `static/`, `Dockerfile`, `requirements.txt`, and this `README.md`) to the Hugging Face space repository. 
+   The Docker container will build automatically, bind to port `7860`, and serve the Flask app!

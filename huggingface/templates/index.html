@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Assistant</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Mermaid.js for Mindmaps -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon">🧠</span>
+                <div>
+                    <h1 class="logo-title">Study Buddy</h1>
+                    <p class="logo-subtitle">Your AI Study Companion</p>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" data-view="doubt">
+                    <span class="nav-icon">💬</span> Ask Doubt
+                </button>
+                <button class="nav-item" data-view="notes">
+                    <span class="nav-icon">📝</span> Generate Notes
+                </button>
+                <button class="nav-item" data-view="quiz">
+                    <span class="nav-icon">🧠</span> Create Quiz
+                </button>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">Configuration</h3>
+                
+                <div class="form-group">
+                    <label for="apiKeyInput">Groq API Key:</label>
+                    <input type="password" id="apiKeyInput" placeholder="Enter key (or leave empty if in .env)">
+                    <div id="apiKeyStatus" class="status-badge status-checking">Checking .env...</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="modelSelect">Choose LLM Model:</label>
+                    <select id="modelSelect">
+                        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                        <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+                        <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+                        <option value="llama3-70b-8192">llama3-70b-8192</option>
+                        <option value="llama3-8b-8192">llama3-8b-8192</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="resetBtn" class="btn btn-secondary reset-button">
+                Clear Cache / Reset App
+            </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- VIEW 1: ASK DOUBT -->
+            <section id="view-doubt" class="content-view active">
+                <div class="view-header">
+                    <div class="badge">CONVERSATIONAL AGENT</div>
+                    <h2 class="view-title">Ask Your Doubts</h2>
+                    <p class="view-desc">Type in any academic question. The assistant uses search, Wikipedia, and math solvers to get precise step-by-step answers.</p>
+                </div>
+                
+                <div class="chat-container">
+                    <div id="chatMessages" class="chat-messages">
+                        <div class="message assistant-message">
+                            Hi there! I am your AI Study Assistant. Ask me any conceptual question or paste a math problem, and we'll break it down together!
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="E.g. Explain quantum tunneling simply, or solve: sqrt(256) * 12 + 55">
+                        <button id="sendChatBtn" class="btn btn-primary send-btn">Send</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: GENERATE NOTES -->
+            <section id="view-notes" class="content-view">
+                <div class="view-header">
+                    <div class="badge">CURRICULUM WRITER</div>
+                    <h2 class="view-title">Study Notes Generator</h2>
+                    <p class="view-desc">Generate comprehensive study notes along with summary checklists and interactive mindmaps.</p>
+                </div>
+
+                <div class="glass-card notes-form">
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="notesTopic">Enter Topic Name:</label>
+                            <input type="text" id="notesTopic" placeholder="E.g. Photosynthesis, Cellular Respiration, Cold War">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="notesAudience">Target Grade/Audience:</label>
+                            <select id="notesAudience">
+                                <option value="Elementary School">Elementary School</option>
+                                <option value="Middle School">Middle School</option>
+                                <option value="High School">High School</option>
+                                <option value="Undergraduate College">Undergraduate College</option>
+                                <option value="General/Professional">General/Professional</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notesDepth">Level of Detail:</label>
+                        <select id="notesDepth">
+                            <option value="Summary Outline">Summary Outline</option>
+                            <option value="Detailed Explanations">Detailed Explanations</option>
+                            <option value="Comprehensive Guide">Comprehensive Guide</option>
+                        </select>
+                    </div>
+
+                    <button id="generateNotesBtn" class="btn btn-primary">Create Notes & Mindmap</button>
+                </div>
+
+                <div id="notesOutputContainer" class="notes-output-container hidden">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="tab-document">📄 Study Notes Document</button>
+                        <button class="tab-btn" data-tab="tab-mindmap">🗺️ Visual Concept Mindmap</button>
+                    </div>
+
+                    <div class="tab-content active" id="tab-document">
+                        <div class="glass-card scrollable-notes">
+                            <div id="notesMarkdownBody" class="markdown-body"></div>
+                        </div>
+                        <button id="downloadNotesBtn" class="btn btn-secondary download-btn">📥 Download Study Notes (.md)</button>
+                    </div>
+
+                    <div class="tab-content" id="tab-mindmap">
+                        <div class="glass-card mindmap-container">
+                            <div class="mindmap-header">
+                                <h3>Interactive Knowledge Mindmap</h3>
+                                <p>A hierarchical visual mapping of key ideas.</p>
+                            </div>
+                            <div id="mermaidCanvas" class="mermaid-canvas"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: CREATE QUIZ -->
+            <section id="view-quiz" class="content-view">
+                <div class="view-header">
+                    <div class="badge">KNOWLEDGE EVALUATOR</div>
+                    <h2 class="view-title">Interactive MCQ Quiz Creator</h2>
+                    <p class="view-desc">Generate quizzes based on study topics. Select answers, submit, and get instant detailed explanations.</p>
+                </div>
+
+                <div class="glass-card quiz-form">
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="quizTopic">Quiz Topic:</label>
+                            <input type="text" id="quizTopic" placeholder="E.g. Newtonian Physics, SQL Joins, Ancient Rome">
+                        </div>
+                        <div class="form-group" style="width: 150px;">
+                            <label for="quizCount">Questions:</label>
+                            <input type="number" id="quizCount" min="1" max="10" value="5">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="quizDifficulty">Difficulty Level:</label>
+                            <select id="quizDifficulty">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="generateQuizBtn" class="btn btn-primary">Generate Quiz</button>
+                </div>
+
+                <div id="quizDisplayContainer" class="quiz-display-container hidden">
+                    <h3 id="quizTitle" class="quiz-title">Quiz Topic</h3>
+                    <div id="quizQuestionsList" class="quiz-questions-list"></div>
+                    <button id="submitQuizBtn" class="btn btn-primary quiz-action-btn">Submit All Answers</button>
+                    <button id="resetQuizBtn" class="btn btn-secondary quiz-action-btn hidden">Retake / Try Another Quiz</button>
+                    
+                    <div id="quizScoreCard" class="glass-card score-card hidden">
+                        <h2 id="scoreTitle">Your Final Score: 0 / 0 (0%)</h2>
+                        <p id="scoreMessage">Feedback message...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Spinner Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <p id="loadingMessage">Generating...</p>
+        </div>
+    </div>
+</body>
+</html>
